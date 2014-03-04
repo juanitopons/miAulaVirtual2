@@ -1,8 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">MiAulaVirtual</string>
-    <string name="action_settings">Settings</string>
+    <string name="app_name">miAulaVirtual</string>
+    <string name="no_internet">Oops..! No existe conexión a Internet.</string>
+
+    <!-- - MAIN -->
+    <string name="edit_message">Pon tu mensaje!</string>
+    <string name="user">Usuario UV</string>
+    <string name="pass">Contraseña</string>
+    <string name="button_send">Entrar</string>
+    <string name="bad_data">Usuario o contraseña incorrectos</string>
+
+    <!-- - DISPLAY -->
+    <string name="panel_error">¡No tienes ninguna carpeta! Esto seguramente es debido a una mala configuración del Panel de Documentos.\n Dirígete a <b>Preferencias</b> para saber más al respecto</string>
+    <string name="panel_error2">El nº de Panel de Documentos indicado no existe</string>
+
+    <!-- - DOCS -->
+    <string name="mydocs">Mis Documentos</string>
+    <string name="t_docs">Documentos</string>
+
+    <!-- - SETTINGS -->
+    <string name="menu_settings">Preferencias</string>
+    <string name="acerca_de">Acerca de</string>
+    <string name="cerrar_sesion">Cerrar Sesión</string>
+
+    <!-- - ABOUT -->
+    <string name="linkedin">Linkedin</string>
+    <string name="email">Email Desarollador</string>
+
+    <!-- - FILEMANAGER -->
+    <string name="a_1">Abrir archivo</string>
+    <string name="a_2">Eliminar archivo</string>
+    <string name="a_3">Información</string>
+    <string name="a_4">Renombrar archivo</string>
+    <string name="a_5">Enviar/Compartir archivo</string>
+    <string name="doc_of">Documentos descargados</string>
+    <string name="handle_1"><b>¡No tienes tarjeta SD!</b>\nLa tarjeta SD es necesaria para el uso de esta aplicación.</string>
+    <string name="handle_2">Oops&#8230; No hemos sido capaces de encontrar ningún archivo.\n¿Aún no has descargado ninguno?</string>
+    <string name="modified">Última modificación:</string>
+    <string name="size">Tamaño:</string>
+    <string name="file_extension">Extensión:</string>
+    <string name="full_name">Nombre completo:</string>
+    <string name="full_path">Ruta del archivo:</string>
+    <string name="file_rename">Nombre archivo</string>
+
+    <!-- - ACTIVITY -->
+    <string name="newapi">NewApi</string>
+
+    <!-- - SERVICE -->
+    <string name="cancel_button">Cancelar</string>
+    <string name="process">Procesando&#8230;</string>
+    <string name="toast_0">¡Descarga cancelada!</string>
+    <string name="toast_1">¡Descarga finalizada!</string>
+    <string name="toast_2">Espacio insuficiente en la tarjeta de memoria</string>
+    <string name="toast_3">Error: archivo inválido!</string>
+    <string name="toast_4">Error: archivo no encontrado!</string>
+    <string name="toast_5">Oops..! Ha ocurrido algún error.</string>
+    <string name="toast_6">Problemas de conexión&#8230;</string>
+    <string name="toast_7">¡No tienes tarjeta de memoria!</string>
+
+    <!-- - FOOTER -->
+    <string name="footer">Copyright 2013 Juan Pons - GNU GPL v3.0 | @juanitopons</string>
     <string name="hello_world">Hello world!</string>
+    <string name="title_activity_file_manager">Gestor archivos</string>
+    <string name="title_activity_tabs">miAulaVirtual</string>
+    <string name="title_activity_task_manager">Tareas</string>
+    <string name="title_activity_about">Acerca de</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_section1">Section 1</string>
+    <string name="title_section2">Section 2</string>
+    <string name="title_section3">Section 3</string>
 
 </resources>

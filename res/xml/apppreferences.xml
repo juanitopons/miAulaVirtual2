@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PreferenceScreen 
+    xmlns:android="http://schemas.android.com/apk/res/android">                       
+    <PreferenceCategory android:title="Identificación">
+        <EditTextPreference
+            android:summary="Tu usuario"
+            android:defaultValue="Ninguno"
+            android:title="User"
+            android:key="myuser"
+            />  
+        <EditTextPreference
+            android:summary="Tu contraseña"
+            android:defaultValue="Ninguno"
+            android:title="Pass"
+            android:key="mypass"
+            android:inputType="textPassword"
+            />                 
+    </PreferenceCategory>
+        <PreferenceCategory android:title="Documentos">
+         <EditTextPreference
+	         android:summary="Nº de la carpeta en la que está la sección Documentos. Ej: 0 = 'Mi Portal'. Por defecto: 2 = 'Mis Documentos'"
+	         android:defaultValue="2"
+	         android:title="Panel de Documentos"
+	         android:key="panel"
+	         android:maxLength="1"
+	         android:inputType="number"
+         />   
+        <CheckBoxPreference
+            android:title="¿Recortar patrones?"
+            android:defaultValue="true"
+            android:summary="Recortar patrones en nombres de carpetas. Año, código, etc."
+            android:key="pattern" />
+        </PreferenceCategory>      
+</PreferenceScreen>

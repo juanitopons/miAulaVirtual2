@@ -8,19 +8,33 @@
         android:minSdkVersion="11"
         android:targetSdkVersion="18" />
 
+    <!-- SDCARD Write Permissions -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" >
+    </uses-permission>
+    <!-- Network Permissions -->
+    <uses-permission android:name="android.permission.INTERNET" >
+    </uses-permission>
+    <!-- Network State Permissions -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="com.juanitopons.miaulavirtual.LoginActivity"
-            android:label="@string/app_name" >
+            android:name="com.juanitopons.miaulavirtual.view.LoginActivity"
+            android:label="@string/app_name"
+            android:windowSoftInputMode="stateHidden" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name="com.juanitopons.miaulavirtual.view.MainActivity"
+            android:label="@string/title_activity_main" >
         </activity>
     </application>
 
