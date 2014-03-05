@@ -9,55 +9,72 @@ import org.jsoup.select.Elements;
 import android.util.Log;
 
 public class Parser {
+    Carpetas[] aulaVirtual;
+    
     public Parser() {}
     
+    /**
+     * @return the aulaVirtual
+     */
+    public Carpetas[] getAulaVirtual() {
+        return aulaVirtual;
+    }
+
+    /**
+     * @param aulaVirtual the aulaVirtual to set
+     */
+    public void setAulaVirtual(Carpetas[] aulaVirtual) {
+        this.aulaVirtual = aulaVirtual;
+    }
+
     public Elements parseDocuments(Document mdoc) throws IOException {
         Elements elem = mdoc.select("table[summary] tbody tr[class=odd], table[summary] tbody tr[class=even], table[summary] tbody tr[class=even last], table[summary] tbody tr[class=odd last]"); //Filas de Documentos
         return elem;
     }
     
-    public String[] carpetasToArray(Elements elem /*, Boolean isHome, Boolean comun*/) throws IndexOutOfBoundsException {
-        int i = 1;
-        String[] carpetas;
-        
+    public void carpetasToArray(Elements elem /*, Boolean isHome, Boolean comun*/) throws IndexOutOfBoundsException {
+        int i = 0;
         elem = elem.select("td[headers=contents_name] a, td[headers=folders_name] a").not("[href*=/clubs/]");
-        carpetas = new String[(elem.size())+1]; //todo-comunidades + 1(carpeta comunidades)
-        carpetas[0] = "Comunidades y otros";
-
+        Log.d("model", String.valueOf(elem.size()));
         for(Element el : elem){
-            carpetas[i] = el.text();
+            aulaVirtual[i].setNombre(el.text());
             i++;
         }
-        
-        return carpetas;
     }
     
-    public String[] enlacesToArray(Elements elem /*, Boolean isHome, Boolean comun*/) throws IndexOutOfBoundsException {
-        int i = 1;
-        String[] enlaces;
-        
+    public void enlacesToArray(Elements elem /*, Boolean isHome, Boolean comun*/) throws IndexOutOfBoundsException {
+        int i = 0;
         elem = elem.select("td[headers=contents_name] a, td[headers=folders_name] a").not("[href*=/clubs/]"); //Nombre Asignaturas String !"Comunuidades"
-        enlaces = new String[(elem.size())+1];
-        enlaces[0] = "/dotlrn/?page_num=2";
+        Log.d("model", String.valueOf(elem.size()));
         for(Element el : elem){
-            enlaces[i] = el.select("a").attr("href");
+            aulaVirtual[i].setUrl(el.select("a").attr("href"));
             i++;
         }
-        
-        return enlaces;
     }
     
-    public String[] tiposToArray(Elements elem /*, Boolean isHome, Boolean comun*/, int size) throws IndexOutOfBoundsException {
-        int i = 1;
-        String[] mtypes = {"carpeta", "Carpeta", "PDF", "Microsoft Excel", "Microsoft PowerPoint", "Microsoft Word"};
-        String[] tipos = new String[size];
-        tipos[0] = "6";
-        
-        while(i<size) {
-            tipos[i] = "1";
-            i++;
+    public void tiposToArray(Elements elem /*, Boolean isHome, Boolean comun*/) throws IndexOutOfBoundsException {
+        int i = 0;
+        elem = elem.select("td[headers=folders_type], td[headers=contents_type]");
+        Log.d("model", String.valueOf(elem.size()));
+        for(; i<27; i++){
+            aulaVirtual[i].setType(MyModel.modelInstance.getIntType(elem.get(i).text().trim()));
         }
-        
-        return tipos;
+    }
+    
+    public void makeAulaVirtual(Document mdoc) {
+        Elements elements = null;
+        try {
+            elements = parseDocuments(mdoc);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        int count = elements.select("td[headers=contents_name] a, td[headers=folders_name] a").not("[href*=/clubs/]").size();
+        aulaVirtual = new Carpetas[count];
+        for(int i = 0; i<count; i++)
+            aulaVirtual[i] = new Carpetas();
+        carpetasToArray(elements);
+        enlacesToArray(elements);
+        tiposToArray(elements);
     }
 }

@@ -19,6 +19,7 @@ import com.juanitopons.miaulavirtual.model.MyModel;
 import com.juanitopons.miaulavirtual.model.MyRequest;
 import com.juanitopons.miaulavirtual.model.Parser;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -30,6 +31,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -40,10 +42,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends FragmentActivity {
+    private static MainActivity mainInstance;
     private static MyModel model;
     private static MyRequest request;
     private static Parser parser;
-
+    private static ConnectionDetector connector;
+    private static ListAdapter[] adapters = new ListAdapter[2];
+    
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
      * fragments for each of the sections. We use a
@@ -58,13 +63,20 @@ public class MainActivity extends FragmentActivity {
      * The {@link ViewPager} that will host the section contents.
      */
     ViewPager mViewPager;
-
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
+        setContentView(R.layout.activity_main); /** IMPORTANT **/
+        mainInstance = this;
         model = MyModel.modelInstance;
+        connector = new ConnectionDetector(getApplicationContext());
+        parser = new Parser();
+        request = new MyRequest(connector, model);
+        adapters[MyModel.AULAVIRTUAL] = new ListAdapter(this, parser.getAulaVirtual());
+
+        new DoConnection(MyModel.POST).execute(""); /** IMPORTANT **/
+        new DoConnection(MyModel.AULAVIRTUAL).execute(model.getPanel(),  String.valueOf(MyModel.AULAVIRTUAL));
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the app.
         mSectionsPagerAdapter = new SectionsPagerAdapter(
@@ -81,6 +93,23 @@ public class MainActivity extends FragmentActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
+    }
+    
+    public void showError(int error) {
+        switch(error) {
+            case 0:
+                Toast.makeText(getBaseContext(), getString(R.string.no_internet), Toast.LENGTH_LONG).show();
+                break;
+            case 1:
+                Toast.makeText(getBaseContext(), getString(R.string.toast_5), Toast.LENGTH_LONG).show();
+                break;
+            case 2:
+                Toast.makeText(getBaseContext(), getString(R.string.bad_data), Toast.LENGTH_SHORT).show();
+                break;
+            default:
+                Toast.makeText(getBaseContext(), getString(R.string.toast_5), Toast.LENGTH_LONG).show();
+                break;
+        }
     }
 
     /**
@@ -136,107 +165,42 @@ public class MainActivity extends FragmentActivity {
          * fragment.
          */
         public static final String ARG_SECTION_NUMBER = "section_number";
-        private View[] rootView = new View[3];
-        private ConnectionDetector connector;
+        private static View[] rootView = new View[3];
 
         public DummySectionFragment() {}
 
         public View getViewByFragment(int i) {
             return  rootView[i-1];
         }
-        
-        public void showError(int error) {
-            switch(error) {
-                case 0:
-                    Toast.makeText(this.getActivity().getBaseContext() ,getString(R.string.no_internet), Toast.LENGTH_LONG).show();
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+            int fragment = getArguments().getInt(ARG_SECTION_NUMBER);
+            Log.d("model", "dummy");
+            switch(fragment) {
+                case 1: /** Aula Virtual **/
+                    rootView[fragment-1] = inflater.inflate(R.layout.activity_display_message, container, false);
+                    
+                    // Actualizamos nombre de LblSubTitulo
+                    TextView headerTitle = (TextView) rootView[fragment-1].findViewById(R.id.LblSubTitulo); // Título Header
+                    headerTitle.setTextColor(getResources().getColor(R.color.list_title));
+                    headerTitle.setTypeface(null, 1);
+                    headerTitle.setText("Documentos");
+                    
+                    ListView lstDocs = (ListView) rootView[fragment-1].findViewById(R.id.LstDocs); // Declaramos la lista
+                    adapters[MyModel.AULAVIRTUAL] = new ListAdapter(this.getActivity(), parser.getAulaVirtual());
+                    lstDocs.setAdapter(adapters[MyModel.AULAVIRTUAL]); // Declaramos nuestra propia clase adaptador como adaptador
+                    
+                    /** FIN **/
                     break;
-                case 1:
-                    Toast.makeText(this.getActivity().getBaseContext() ,getString(R.string.toast_5), Toast.LENGTH_LONG).show();
-                    break;
-                case 2:
-                    Toast.makeText(this.getActivity().getBaseContext() ,getString(R.string.bad_data), Toast.LENGTH_SHORT).show();
+                case 3: /** Tareas **/
+                    rootView[fragment-1] = inflater.inflate(R.layout.load, container, false);
                     break;
                 default:
-                    Toast.makeText(this.getActivity().getBaseContext() ,getString(R.string.toast_5), Toast.LENGTH_LONG).show();
-                    break;
-            }
-        }
-        
-        public void setViewOnError(ViewGroup container) {
-            /** rootView[0] = inflater.inflate(R.layout.error_page, container, false);  sección aulavirtual
-            rootView[2] = inflater.inflate(R.layout.error_page, container, false); sección tareas **/
-                    
-        }
-        
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                Bundle savedInstanceState) {
-            
-            connector = new ConnectionDetector(this.getActivity().getApplicationContext());
-            parser = new Parser();
-            request = new MyRequest(connector, model);
-            
-            int fragment = getArguments().getInt(ARG_SECTION_NUMBER);
-            DoConnection taskConnection = new DoConnection(this.getTargetFragment(), container); /* IMPORTANT */
-            try {
-                taskConnection.execute("").get(10*1000, TimeUnit.MILLISECONDS);
-                switch(fragment) {
-                    case 1: /** Aula Virtual **/
-                        rootView[fragment-1] = inflater.inflate(R.layout.load, container, false);
-                        
-                        /** Reformatear **/
-                        Elements elements = null;
-                        String[] carpetas;
-                        String[] enlaces;
-                        String[] tipos;
-                        
-                        taskConnection = new DoConnection(this.getTargetFragment(), container);
-                        taskConnection.execute(model.getPanel()).get(10*1000, TimeUnit.MILLISECONDS); /** IMPORTANT **/
-                        
-                        try {
-                            elements = parser.parseDocuments(Jsoup.parse(request.getResp().body()));
-                        } catch (IOException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
-                        }
-                        carpetas = parser.carpetasToArray(elements);
-                        enlaces = parser.enlacesToArray(elements);
-                        tipos = parser.tiposToArray(elements, enlaces.length);
-                        
-                        rootView[fragment-1] = inflater.inflate(R.layout.activity_display_message, container, false);
-                        
-                        // Actualizamos nombre de LblSubTitulo
-                        TextView headerTitle = (TextView) rootView[fragment-1].findViewById(R.id.LblSubTitulo); // Título Header
-                        headerTitle.setTextColor(getResources().getColor(R.color.list_title));
-                        headerTitle.setTypeface(null, 1);
-                        headerTitle.setText("Documentos");
-                        
-                        ListView lstDocs = (ListView) rootView[fragment-1].findViewById(R.id.LstDocs); // Declaramos la lista
-                        ListAdapter lstAdapter = new ListAdapter(this.getActivity(), carpetas, tipos);
-                        lstDocs.setAdapter(lstAdapter); // Declaramos nuestra propia clase adaptador como adaptador
-                        lstDocs.setAdapter(lstAdapter);
-                        
-                        /** FIN **/
-                        
-                        break;
-                    case 3: /** Tareas **/
-                        rootView[fragment-1] = inflater.inflate(R.layout.load, container, false);
-                        break;
-                    default:
-                        rootView[fragment-1] = inflater.inflate(R.layout.fragment_main_dummy, container, false);
-                        TextView dummyTextView = (TextView) rootView[fragment-1].findViewById(R.id.section_label);
-                        dummyTextView.setText(Integer.toString(fragment));
-                        break;     
-                }
-                
-            } catch (InterruptedException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
-            } catch (TimeoutException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
-            } catch (ExecutionException e1) {
-                
+                    rootView[fragment-1] = inflater.inflate(R.layout.fragment_main_dummy, container, false);
+                    TextView dummyTextView = (TextView) rootView[fragment-1].findViewById(R.id.section_label);
+                    dummyTextView.setText(Integer.toString(fragment));
+                    break;     
             }
             
             /*TextView dummyTextView = (TextView) rootView
@@ -251,19 +215,18 @@ public class MainActivity extends FragmentActivity {
     }
     
     private static class DoConnection extends AsyncTask<String, Integer, Integer> {
-        DummySectionFragment dummy;
-        ViewGroup container;
+        int mode;
         
-        protected DoConnection(Fragment dummy, ViewGroup container) {
-            this.dummy = (DummySectionFragment) dummy;
-            this.container = container;
+        protected DoConnection(int mode) {
+            this.mode = mode;
         }
         
         protected Integer doInBackground(String... parameters) {
+            Log.d("model", String.valueOf(mode));
             Integer state = -1;
             try {
                 if(!parameters[0].isEmpty()) {
-                    request.doGet(parameters[0]);
+                    request.doGet(parameters[0], Integer.valueOf(parameters[1]));
                 } else {
                     request.doPostUrl1();
                     request.doGetUrl2();
@@ -284,13 +247,24 @@ public class MainActivity extends FragmentActivity {
         protected void onProgressUpdate(Integer... progress) {}
         
         protected void onCancelled(Integer state) {
-            dummy.showError(state);
-            dummy.setViewOnError(container);
-            
+            mainInstance.showError(state);
+            for(ListAdapter adapter : adapters) {
+                if(adapter!=null) { /** <<<<<<<<<<<<<<<<--------------BORRAR POST DESARROLLO------------>>>>>>>>>> **/
+                    adapter.clearData();
+                    adapter.setStatus(MyModel.ERROR);
+                    adapter.notifyDataSetChanged();
+                }
+            }   
         }
 
         protected void onPostExecute(Integer state) {
-            // Aquí la tarea siempre habrá finalizado correctamente
+            if(mode != MyModel.POST) {
+                adapters[mode].clearData();
+                parser.makeAulaVirtual(Jsoup.parse(request.getResp(MyModel.AULAVIRTUAL).body()));
+                adapters[mode].setCarpetas(parser.getAulaVirtual());
+                adapters[mode].setStatus(MyModel.OK);
+                adapters[mode].notifyDataSetChanged();
+            }
         }
     }
 

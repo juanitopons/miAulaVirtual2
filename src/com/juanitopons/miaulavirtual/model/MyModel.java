@@ -9,7 +9,12 @@ import android.content.SharedPreferences.Editor;
 
 
 public class MyModel implements Serializable {
+    private String[] mtypes = {"carpeta", "Carpeta", "PDF", "Microsoft Excel", "Microsoft PowerPoint", "Microsoft Word"};
+    //Map<String, Integer> aMap = new HashMap<String, Integer>({{"carpeta", 0}});
+    public static final int CARPETA = 0, PDF = 1, EXCEL = 2, PPT = 3, WORD = 4; 
+    public static final int POST = 2, AULAVIRTUAL = 0, CALENDARIO = 1;
     public static final int NOINTERNET = 0, RANDOM = 1, BADDATA = 2;
+    public static final int ERROR = 0, LOAD = 1, OK = 2;
     public static MyModel modelInstance;
     private MyRequest request;
     private Context context;
@@ -27,6 +32,16 @@ public class MyModel implements Serializable {
         pass = prefs.getString("mypass", "0");
         panel = prefs.getString("panel", "2");
         editor = prefs.edit();
+    }
+    
+    public int getIntType(String type) {
+        int a = CARPETA;
+        if(mtypes[2].equals(type)) a = PDF; // 2 = PDF 
+        if(mtypes[3].equals(type)) a = EXCEL; // 3 = Excel
+        if(mtypes[4].equals(type)) a = PPT; // 4 = Power Point
+        if(mtypes[5].equals(type)) a = WORD;
+        
+        return a;
     }
     
     /**

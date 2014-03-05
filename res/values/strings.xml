@@ -14,6 +14,7 @@
     <!-- - DISPLAY -->
     <string name="panel_error">¡No tienes ninguna carpeta! Esto seguramente es debido a una mala configuración del Panel de Documentos.\n Dirígete a <b>Preferencias</b> para saber más al respecto</string>
     <string name="panel_error2">El nº de Panel de Documentos indicado no existe</string>
+    <string name="fragment_error">Ehm...bueno, pues..digamos que algo no ha ido bien.</string>
 
     <!-- - DOCS -->
     <string name="mydocs">Mis Documentos</string>

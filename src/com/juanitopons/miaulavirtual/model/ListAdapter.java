@@ -44,22 +44,42 @@ import android.widget.TextView;
 public class ListAdapter extends BaseAdapter {
     
     Activity context;
-    String[] names;
-    String[] types;
+    Carpetas[] carpetas;
+    int status;
 
-    public ListAdapter(Activity context,  String[] names, String[] types) {
+    public ListAdapter(Activity context, Object[] contenido) {
     	 super();
          this.context = context;
-         this.names = new String[names.length];
-         System.arraycopy(names, 0, this.names, 0, names.length);
-         this.types = new String[types.length];
-         System.arraycopy(types, 0, this.types, 0, types.length);
-        
+         if(contenido != null) {
+             this.carpetas = (Carpetas[]) contenido; 
+         }
+         this.status = MyModel.LOAD;
     }
+    
+    /**
+     * @return the status
+     */
+    public int getStatus() {
+        return status;
+    }
+
+    /**
+     * @param status the status to set
+     */
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public void setCarpetas(Carpetas[] carpetas) {
+        this.carpetas = carpetas;
+    }
+    
      
     public int getCount() {
-    	if(names==null) return 1;
-        return names.length;
+        if(carpetas != null) {
+            return carpetas.length;
+        }
+        return 1;
     }
     
     public Object getItem(int position) {
@@ -72,8 +92,8 @@ public class ListAdapter extends BaseAdapter {
     
     public void clearData() {
         // clear the data
-        names = null;
-        types = null;
+        if(carpetas != null)
+            carpetas = null;
     }
     
 	private void setRestrictedOrientation() {
@@ -91,85 +111,76 @@ public class ListAdapter extends BaseAdapter {
 	}
     
 	public View getView(int position, View convertView, ViewGroup parent) {
-    	View item;
-    	if(names!=null) {
+    	View item = null;
     	LayoutInflater inflater = context.getLayoutInflater();
-    	
-        item = inflater.inflate(R.layout.list_docs, null);
-        item.setMinimumHeight(65);  
-        item.setPadding(14, 0, 6, 0);
-        TextView title;
-        ImageView image;
-        int ico;
-        // Title
-	    title = (TextView)item.findViewById(R.id.list_title);
-	    String rgxTitle;
-	    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context); // Obtenemos las preferencias
-	    
-	    // Image
-	    image = (ImageView)item.findViewById(R.id.folderImage);
-	    switch(Integer.parseInt(types[position].toString())) {
-	    case 0: // Back button
-	    	rgxTitle = names[position].toString().replaceAll( "\\d{4}-\\d{4}\\s|\\d{4}-\\d{2}\\s|Documentos\\sde\\s?|Gr\\..+?\\s|\\(.+?\\)", "" );
-	    	title.setText(rgxTitle.trim());
-	    	ico = context.getResources().getIdentifier("com.jp.miaulavirtual:drawable/ic_back", null, null); // Back ico
-	    	image.setImageResource(ico);
-	    	break;
-	    case 1: // Folder
-	    	rgxTitle = names[position].toString().replaceAll( "\\d{4}-\\d{4}\\s|\\d{4}-\\d{2}\\s|Documentos\\sde\\s?|Gr\\..+?\\s|\\(.+?\\)", "" );
-	    	title.setText(rgxTitle.trim());
-	    	ico = context.getResources().getIdentifier("com.jp.miaulavirtual:drawable/icon_folder", null, null); // Folder ico
-	    	image.setImageResource(ico);
-	    	break;
-	    case 2: // PDF
-	    	rgxTitle = names[position].toString();
-	    	title.setText(rgxTitle.trim());
-	    	ico = context.getResources().getIdentifier("com.jp.miaulavirtual:drawable/ic_pdf", null, null); // PDF ico
-	    	image.setImageResource(ico);
-	    	break;	    	
-	    case 3: // Excel
-	    	rgxTitle = names[position].toString();
-	    	title.setText(rgxTitle.trim());
-	    	ico = context.getResources().getIdentifier("com.jp.miaulavirtual:drawable/ic_excel", null, null); // Excel ico
-	    	image.setImageResource(ico);
-	    	break;
-	    case 4: // Power Point
-	    	rgxTitle = names[position].toString();
-	    	title.setText(rgxTitle.trim());
-	    	ico = context.getResources().getIdentifier("com.jp.miaulavirtual:drawable/ic_ppt", null, null); // PPT ico
-	    	image.setImageResource(ico);
-	    	break;
-	    case 5: // Word
-	    	rgxTitle = names[position].toString();
-	    	title.setText(rgxTitle.trim());
-	    	ico = context.getResources().getIdentifier("com.jp.miaulavirtual:drawable/ic_word", null, null); // Word ico
-	    	image.setImageResource(ico);
-	    	break;
-	    case 6: // Communities and others
-	    	rgxTitle = names[position].toString().replaceAll( "\\d{4}-\\d{4}\\s|\\d{4}-\\d{2}\\s|Documentos\\sde\\s?|Gr\\..+?\\s|\\(.+?\\)", "" );
-	    	title.setText(rgxTitle.trim());
-	    	ico = context.getResources().getIdentifier("com.jp.miaulavirtual:drawable/ic_comu", null, null); // Word ico
-	    	image.setImageResource(ico);
-	    	break;
-	    default: // Default
-	    	rgxTitle = names[position].toString();
-	    	title.setText(rgxTitle);
-	    	ico = context.getResources().getIdentifier("com.jp.miaulavirtual:drawable/ic_def", null, null); // Other ico
-	    	image.setImageResource(ico);
-	    	break;
-	    }
-	    if(!prefs.getBoolean("pattern", true)) title.setText(names[position].toString());
-	    Log.d("Tipo de archivo", String.valueOf(types[position].toString()));
-        
-        /*
-         * Trick: When we clear the List (because user click any subject) we change the item count to 1 and we load the loading page (load_list) with restricted orientation.
-         */
-    	} else { 			
-    		setRestrictedOrientation();
-    
-    		LayoutInflater inflater = context.getLayoutInflater();
-    	    item = inflater.inflate(R.layout.load_list, null);
-    	    item.setMinimumHeight(35);
+    	switch(status) {
+    	    case MyModel.OK:
+    	        Log.d("model", "EN OK");
+                item = inflater.inflate(R.layout.list_docs, null);
+                item.setMinimumHeight(65);  
+                item.setPadding(14, 0, 6, 0);
+                TextView title;
+                ImageView image;
+                int ico;
+                // Title
+        	    title = (TextView)item.findViewById(R.id.list_title);
+        	    String rgxTitle;
+        	    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context); // Obtenemos las preferencias
+        	    
+        	    // Image
+        	    image = (ImageView)item.findViewById(R.id.folderImage);
+        	    switch(carpetas[position].getType()) {
+        	    case 0: // Folder
+        	    	rgxTitle = carpetas[position].getNombre().replaceAll( "\\d{4}-\\d{4}\\s|\\d{4}-\\d{2}\\s|Documentos\\sde\\s?|Gr\\..+?\\s|\\(.+?\\)", "" );
+        	    	title.setText(rgxTitle.trim());
+        	    	ico = context.getResources().getIdentifier("com.juanitopons.miaulavirtual:drawable/icon_folder", null, null); // Folder ico
+        	    	image.setImageResource(ico);
+        	    	break;
+        	    case 1: // PDF
+        	    	rgxTitle = carpetas[position].getNombre();
+        	    	title.setText(rgxTitle.trim());
+        	    	ico = context.getResources().getIdentifier("com.juanitopons.miaulavirtual:drawable/ic_pdf", null, null); // PDF ico
+        	    	image.setImageResource(ico);
+        	    	break;	    	
+        	    case 2: // Excel
+        	    	rgxTitle = carpetas[position].getNombre();
+        	    	title.setText(rgxTitle.trim());
+        	    	ico = context.getResources().getIdentifier("com.juanitopons.miaulavirtual:drawable/ic_excel", null, null); // Excel ico
+        	    	image.setImageResource(ico);
+        	    	break;
+        	    case 3: // Power Point
+        	    	rgxTitle = carpetas[position].getNombre();
+        	    	title.setText(rgxTitle.trim());
+        	    	ico = context.getResources().getIdentifier("com.juanitopons.miaulavirtual:drawable/ic_ppt", null, null); // PPT ico
+        	    	image.setImageResource(ico);
+        	    	break;
+        	    case 4: // Word
+        	    	rgxTitle = carpetas[position].getNombre();
+        	    	title.setText(rgxTitle.trim());
+        	    	ico = context.getResources().getIdentifier("com.juanitopons.miaulavirtual:drawable/ic_word", null, null); // Word ico
+        	    	image.setImageResource(ico);
+        	    	break;
+        	    default: // Default
+        	    	rgxTitle = carpetas[position].getNombre();
+        	    	title.setText(rgxTitle);
+        	    	ico = context.getResources().getIdentifier("com.juanitopons.miaulavirtual:drawable/ic_def", null, null); // Other ico
+        	    	image.setImageResource(ico);
+        	    	break;
+        	    }
+        	    if(!prefs.getBoolean("pattern", true)) title.setText(carpetas[position].getNombre());
+        	    break;
+    	    case MyModel.LOAD: 		
+    	        Log.d("model", "EN LOAD");
+        		setRestrictedOrientation();
+        	    item = inflater.inflate(R.layout.load, null);
+        	    item.setMinimumHeight(35);
+        	    break;
+    	    case MyModel.ERROR:
+    	        Log.d("model", "EN ERROR");
+    	        setRestrictedOrientation();
+                item = inflater.inflate(R.layout.error_page, null);
+                item.setMinimumHeight(35);
+                break;
     	}
         return(item);
     }

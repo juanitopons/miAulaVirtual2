@@ -84,10 +84,11 @@ public final class R {
         public static final int activity_display_message=0x7f030000;
         public static final int activity_login=0x7f030001;
         public static final int activity_main=0x7f030002;
-        public static final int fragment_main_dummy=0x7f030003;
-        public static final int list_docs=0x7f030004;
-        public static final int load=0x7f030005;
-        public static final int load_list=0x7f030006;
+        public static final int error_page=0x7f030003;
+        public static final int fragment_main_dummy=0x7f030004;
+        public static final int list_docs=0x7f030005;
+        public static final int load=0x7f030006;
+        public static final int load_list=0x7f030007;
     }
     public static final class menu {
         public static final int login=0x7f090000;
@@ -96,73 +97,74 @@ public final class R {
     public static final class string {
         /**  - FILEMANAGER 
          */
-        public static final int a_1=0x7f070010;
-        public static final int a_2=0x7f070011;
-        public static final int a_3=0x7f070012;
-        public static final int a_4=0x7f070013;
-        public static final int a_5=0x7f070014;
-        public static final int acerca_de=0x7f07000c;
-        public static final int action_settings=0x7f070030;
+        public static final int a_1=0x7f070011;
+        public static final int a_2=0x7f070012;
+        public static final int a_3=0x7f070013;
+        public static final int a_4=0x7f070014;
+        public static final int a_5=0x7f070015;
+        public static final int acerca_de=0x7f07000d;
+        public static final int action_settings=0x7f070031;
         public static final int app_name=0x7f070000;
         public static final int bad_data=0x7f070006;
         public static final int button_send=0x7f070005;
         /**  - SERVICE 
          */
-        public static final int cancel_button=0x7f07001f;
-        public static final int cerrar_sesion=0x7f07000d;
-        public static final int doc_of=0x7f070015;
+        public static final int cancel_button=0x7f070020;
+        public static final int cerrar_sesion=0x7f07000e;
+        public static final int doc_of=0x7f070016;
         /**  - MAIN 
          */
         public static final int edit_message=0x7f070002;
-        public static final int email=0x7f07000f;
-        public static final int file_extension=0x7f07001a;
-        public static final int file_rename=0x7f07001d;
+        public static final int email=0x7f070010;
+        public static final int file_extension=0x7f07001b;
+        public static final int file_rename=0x7f07001e;
         /**  - FOOTER 
          */
-        public static final int footer=0x7f070029;
-        public static final int full_name=0x7f07001b;
-        public static final int full_path=0x7f07001c;
-        public static final int handle_1=0x7f070016;
-        public static final int handle_2=0x7f070017;
-        public static final int hello_world=0x7f07002a;
+        public static final int footer=0x7f07002a;
+        public static final int fragment_error=0x7f070009;
+        public static final int full_name=0x7f07001c;
+        public static final int full_path=0x7f07001d;
+        public static final int handle_1=0x7f070017;
+        public static final int handle_2=0x7f070018;
+        public static final int hello_world=0x7f07002b;
         /**  - ABOUT 
          */
-        public static final int linkedin=0x7f07000e;
+        public static final int linkedin=0x7f07000f;
         /**  - SETTINGS 
          */
-        public static final int menu_settings=0x7f07000b;
-        public static final int modified=0x7f070018;
+        public static final int menu_settings=0x7f07000c;
+        public static final int modified=0x7f070019;
         /**  - DOCS 
          */
-        public static final int mydocs=0x7f070009;
+        public static final int mydocs=0x7f07000a;
         /**  - ACTIVITY 
          */
-        public static final int newapi=0x7f07001e;
+        public static final int newapi=0x7f07001f;
         public static final int no_internet=0x7f070001;
         /**  - DISPLAY 
          */
         public static final int panel_error=0x7f070007;
         public static final int panel_error2=0x7f070008;
         public static final int pass=0x7f070004;
-        public static final int process=0x7f070020;
-        public static final int size=0x7f070019;
-        public static final int t_docs=0x7f07000a;
-        public static final int title_activity_about=0x7f07002e;
-        public static final int title_activity_file_manager=0x7f07002b;
-        public static final int title_activity_main=0x7f07002f;
-        public static final int title_activity_tabs=0x7f07002c;
-        public static final int title_activity_task_manager=0x7f07002d;
-        public static final int title_section1=0x7f070031;
-        public static final int title_section2=0x7f070032;
-        public static final int title_section3=0x7f070033;
-        public static final int toast_0=0x7f070021;
-        public static final int toast_1=0x7f070022;
-        public static final int toast_2=0x7f070023;
-        public static final int toast_3=0x7f070024;
-        public static final int toast_4=0x7f070025;
-        public static final int toast_5=0x7f070026;
-        public static final int toast_6=0x7f070027;
-        public static final int toast_7=0x7f070028;
+        public static final int process=0x7f070021;
+        public static final int size=0x7f07001a;
+        public static final int t_docs=0x7f07000b;
+        public static final int title_activity_about=0x7f07002f;
+        public static final int title_activity_file_manager=0x7f07002c;
+        public static final int title_activity_main=0x7f070030;
+        public static final int title_activity_tabs=0x7f07002d;
+        public static final int title_activity_task_manager=0x7f07002e;
+        public static final int title_section1=0x7f070032;
+        public static final int title_section2=0x7f070033;
+        public static final int title_section3=0x7f070034;
+        public static final int toast_0=0x7f070022;
+        public static final int toast_1=0x7f070023;
+        public static final int toast_2=0x7f070024;
+        public static final int toast_3=0x7f070025;
+        public static final int toast_4=0x7f070026;
+        public static final int toast_5=0x7f070027;
+        public static final int toast_6=0x7f070028;
+        public static final int toast_7=0x7f070029;
         public static final int user=0x7f070003;
     }
     public static final class style {
