@@ -115,7 +115,6 @@ public class ListAdapter extends BaseAdapter {
     	LayoutInflater inflater = context.getLayoutInflater();
     	switch(status) {
     	    case MyModel.OK:
-    	        Log.d("model", "EN OK");
                 item = inflater.inflate(R.layout.list_docs, null);
                 item.setMinimumHeight(65);  
                 item.setPadding(14, 0, 6, 0);
@@ -170,13 +169,11 @@ public class ListAdapter extends BaseAdapter {
         	    if(!prefs.getBoolean("pattern", true)) title.setText(carpetas[position].getNombre());
         	    break;
     	    case MyModel.LOAD: 		
-    	        Log.d("model", "EN LOAD");
         		setRestrictedOrientation();
         	    item = inflater.inflate(R.layout.load, null);
         	    item.setMinimumHeight(35);
         	    break;
     	    case MyModel.ERROR:
-    	        Log.d("model", "EN ERROR");
     	        setRestrictedOrientation();
                 item = inflater.inflate(R.layout.error_page, null);
                 item.setMinimumHeight(35);

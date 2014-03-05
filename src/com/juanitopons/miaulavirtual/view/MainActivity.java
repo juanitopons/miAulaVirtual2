@@ -1,37 +1,22 @@
 package com.juanitopons.miaulavirtual.view;
 
-import java.io.IOException;
-import java.net.SocketTimeoutException;
 import java.util.Locale;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import org.jsoup.Jsoup;
-import org.jsoup.Connection.Response;
-import org.jsoup.select.Elements;
 
 import com.juanitopons.miaulavirtual.R;
 import com.juanitopons.miaulavirtual.model.ConnectionDetector;
+import com.juanitopons.miaulavirtual.model.ConnectionTask;
 import com.juanitopons.miaulavirtual.model.ListAdapter;
-import com.juanitopons.miaulavirtual.model.BadDataException;
 import com.juanitopons.miaulavirtual.model.MyModel;
 import com.juanitopons.miaulavirtual.model.MyRequest;
 import com.juanitopons.miaulavirtual.model.Parser;
-
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -42,12 +27,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends FragmentActivity {
-    private static MainActivity mainInstance;
     private static MyModel model;
     private static MyRequest request;
     private static Parser parser;
     private static ConnectionDetector connector;
     private static ListAdapter[] adapters = new ListAdapter[2];
+    private static Context context;
     
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -68,19 +53,19 @@ public class MainActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main); /** IMPORTANT **/
-        mainInstance = this;
-        model = MyModel.modelInstance;
-        connector = new ConnectionDetector(getApplicationContext());
-        parser = new Parser();
-        request = new MyRequest(connector, model);
+        model = MyModel.getInstance();
+        connector = ConnectionDetector.getInstance(model.getContext());
+        parser = Parser.getInstance();
+        request = MyRequest.getInstance();
+        context = this.getBaseContext();
         adapters[MyModel.AULAVIRTUAL] = new ListAdapter(this, parser.getAulaVirtual());
 
-        new DoConnection(MyModel.POST).execute(""); /** IMPORTANT **/
-        new DoConnection(MyModel.AULAVIRTUAL).execute(model.getPanel(),  String.valueOf(MyModel.AULAVIRTUAL));
+        ConnectionTask taskToWait = new ConnectionTask(this, request, parser, Integer.valueOf(MyModel.AULAVIRTUAL));
+        new ConnectionTask(this, request, parser, MyModel.POST, taskToWait).execute(""); /** IMPORTANT **/
+
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the app.
-        mSectionsPagerAdapter = new SectionsPagerAdapter(
-                getSupportFragmentManager());
+        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.pager);
@@ -95,21 +80,41 @@ public class MainActivity extends FragmentActivity {
         return true;
     }
     
-    public void showError(int error) {
+    public static void showError(int error) {
         switch(error) {
             case 0:
-                Toast.makeText(getBaseContext(), getString(R.string.no_internet), Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.context, MainActivity.context.getString(R.string.no_internet), Toast.LENGTH_LONG).show();
                 break;
             case 1:
-                Toast.makeText(getBaseContext(), getString(R.string.toast_5), Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.context, MainActivity.context.getString(R.string.toast_5), Toast.LENGTH_LONG).show();
                 break;
             case 2:
-                Toast.makeText(getBaseContext(), getString(R.string.bad_data), Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.context, MainActivity.context.getString(R.string.bad_data), Toast.LENGTH_SHORT).show();
                 break;
             default:
-                Toast.makeText(getBaseContext(), getString(R.string.toast_5), Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.context, MainActivity.context.getString(R.string.toast_5), Toast.LENGTH_LONG).show();
                 break;
         }
+    }
+    
+    public void moveToLogin() {
+        model.setUser("0");
+        model.setPass("0");
+        startActivity(new Intent(MainActivity.this, LoginActivity.class));
+    }
+
+    /**
+     * @return the adapters
+     */
+    public static ListAdapter[] getAdapters() {
+        return adapters;
+    }
+
+    /**
+     * @param adapters the adapters to set
+     */
+    public static void setAdapters(ListAdapter[] adapters) {
+        MainActivity.adapters = adapters;
     }
 
     /**
@@ -176,7 +181,6 @@ public class MainActivity extends FragmentActivity {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             int fragment = getArguments().getInt(ARG_SECTION_NUMBER);
-            Log.d("model", "dummy");
             switch(fragment) {
                 case 1: /** Aula Virtual **/
                     rootView[fragment-1] = inflater.inflate(R.layout.activity_display_message, container, false);
@@ -213,59 +217,4 @@ public class MainActivity extends FragmentActivity {
             return getViewByFragment(fragment);
         }
     }
-    
-    private static class DoConnection extends AsyncTask<String, Integer, Integer> {
-        int mode;
-        
-        protected DoConnection(int mode) {
-            this.mode = mode;
-        }
-        
-        protected Integer doInBackground(String... parameters) {
-            Log.d("model", String.valueOf(mode));
-            Integer state = -1;
-            try {
-                if(!parameters[0].isEmpty()) {
-                    request.doGet(parameters[0], Integer.valueOf(parameters[1]));
-                } else {
-                    request.doPostUrl1();
-                    request.doGetUrl2();
-                }
-            } catch (SocketTimeoutException e) {
-                state = MyModel.NOINTERNET;
-                this.cancel(true);
-            } catch (IOException e) {
-                state = MyModel.RANDOM;
-                this.cancel(true);
-            } catch (BadDataException e) {
-                state = MyModel.BADDATA;
-                this.cancel(true);
-            }
-            return state;
-        }
-
-        protected void onProgressUpdate(Integer... progress) {}
-        
-        protected void onCancelled(Integer state) {
-            mainInstance.showError(state);
-            for(ListAdapter adapter : adapters) {
-                if(adapter!=null) { /** <<<<<<<<<<<<<<<<--------------BORRAR POST DESARROLLO------------>>>>>>>>>> **/
-                    adapter.clearData();
-                    adapter.setStatus(MyModel.ERROR);
-                    adapter.notifyDataSetChanged();
-                }
-            }   
-        }
-
-        protected void onPostExecute(Integer state) {
-            if(mode != MyModel.POST) {
-                adapters[mode].clearData();
-                parser.makeAulaVirtual(Jsoup.parse(request.getResp(MyModel.AULAVIRTUAL).body()));
-                adapters[mode].setCarpetas(parser.getAulaVirtual());
-                adapters[mode].setStatus(MyModel.OK);
-                adapters[mode].notifyDataSetChanged();
-            }
-        }
-    }
-
 }

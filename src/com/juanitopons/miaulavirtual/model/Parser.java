@@ -9,9 +9,20 @@ import org.jsoup.select.Elements;
 import android.util.Log;
 
 public class Parser {
+    private static Parser parserInstance = null;
+    private static MyModel modelInstance;
     Carpetas[] aulaVirtual;
     
-    public Parser() {}
+    protected Parser() {
+        modelInstance = MyModel.getInstance();
+    }
+    
+    public static Parser getInstance() {
+        if(parserInstance == null) {
+            parserInstance = new Parser();
+        }
+        return parserInstance;
+     }
     
     /**
      * @return the aulaVirtual
@@ -52,12 +63,13 @@ public class Parser {
         }
     }
     
-    public void tiposToArray(Elements elem /*, Boolean isHome, Boolean comun*/) throws IndexOutOfBoundsException {
+    public void tiposToArray(Elements elem /*, Boolean isHome, Boolean comun*/, int size) throws IndexOutOfBoundsException {
         int i = 0;
         elem = elem.select("td[headers=folders_type], td[headers=contents_type]");
         Log.d("model", String.valueOf(elem.size()));
-        for(; i<27; i++){
-            aulaVirtual[i].setType(MyModel.modelInstance.getIntType(elem.get(i).text().trim()));
+        while(i<size){
+            aulaVirtual[i].setType(modelInstance.getIntType(elem.get(i).text().trim()));
+            i++;
         }
     }
     
@@ -75,6 +87,6 @@ public class Parser {
             aulaVirtual[i] = new Carpetas();
         carpetasToArray(elements);
         enlacesToArray(elements);
-        tiposToArray(elements);
+        tiposToArray(elements, aulaVirtual.length);
     }
 }

@@ -9,30 +9,31 @@ import android.content.SharedPreferences.Editor;
 
 
 public class MyModel implements Serializable {
-    private String[] mtypes = {"carpeta", "Carpeta", "PDF", "Microsoft Excel", "Microsoft PowerPoint", "Microsoft Word"};
+    private static MyModel modelInstance;
+    private static String[] mtypes = {"carpeta", "Carpeta", "PDF", "Microsoft Excel", "Microsoft PowerPoint", "Microsoft Word"};
+    private final String url1 = "https://as.uv.es/cgi-bin/AuthServer", url2 = "http://aulavirtual.uv.es/cas", url3 = "http://aulavirtual.uv.es/dotlrn/?page_num=";
     //Map<String, Integer> aMap = new HashMap<String, Integer>({{"carpeta", 0}});
     public static final int CARPETA = 0, PDF = 1, EXCEL = 2, PPT = 3, WORD = 4; 
     public static final int POST = 2, AULAVIRTUAL = 0, CALENDARIO = 1;
     public static final int NOINTERNET = 0, RANDOM = 1, BADDATA = 2;
     public static final int ERROR = 0, LOAD = 1, OK = 2;
-    public static MyModel modelInstance;
     private MyRequest request;
     private Context context;
-    private final SharedPreferences prefs;
-    private final Editor editor;
-    private final String url1 = "https://as.uv.es/cgi-bin/AuthServer", url2 = "http://aulavirtual.uv.es/cas", url3 = "http://aulavirtual.uv.es/dotlrn/?page_num=";
+    private SharedPreferences prefs;
+    private Editor editor;
     private String user, pass, panel;
     private Map<String, String> cookies1;
     
-    public MyModel(Context context) {
+    protected MyModel() {
         modelInstance = this;
-        this.context = context;
-        prefs = context.getSharedPreferences("apppreferences", 0);
-        user = prefs.getString("myuser", "0");
-        pass = prefs.getString("mypass", "0");
-        panel = prefs.getString("panel", "2");
-        editor = prefs.edit();
     }
+    
+    public static MyModel getInstance() {
+        if(modelInstance == null) {
+            modelInstance = new MyModel();
+        }
+        return modelInstance;
+     }
     
     public int getIntType(String type) {
         int a = CARPETA;
@@ -84,6 +85,15 @@ public class MyModel implements Serializable {
      */
     public String getPanel() {
         return panel;
+    }
+    
+    public void setContext(Context context) {
+        this.context = context;
+        prefs = context.getSharedPreferences("apppreferences", 0);
+        user = prefs.getString("myuser", "0");
+        pass = prefs.getString("mypass", "0");
+        panel = prefs.getString("panel", "2");
+        editor = prefs.edit();
     }
 
     /**

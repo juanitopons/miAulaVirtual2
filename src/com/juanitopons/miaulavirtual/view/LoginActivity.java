@@ -32,7 +32,8 @@ public class LoginActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         
         PreferenceManager.setDefaultValues(this.getApplicationContext(), R.xml.apppreferences, false);
-        model = new MyModel(this.getApplicationContext());
+        model = MyModel.getInstance();
+        model.setContext(this.getApplicationContext());
         Log.d("model", model.toString());
         
         if(model.getUser().equals("0")){

@@ -24,12 +24,19 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
  
 public class ConnectionDetector {
- 
+    private static ConnectionDetector detectorInstance;
     private Context _context;
  
-    public ConnectionDetector(Context context){
+    protected ConnectionDetector(Context context){
         this._context = context;
     }
+    
+    public static ConnectionDetector getInstance(Context context) {
+        if(detectorInstance == null) {
+            detectorInstance = new ConnectionDetector(context);
+        }
+        return detectorInstance;
+     }
  
     public boolean isConnectingToInternet(){
         ConnectivityManager connectivity = (ConnectivityManager) _context.getSystemService(Context.CONNECTIVITY_SERVICE);
