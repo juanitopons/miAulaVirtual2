@@ -41,78 +41,16 @@ import android.widget.TextView;
  * Creamos nuestro propio adaptador para la lista con la siguiente clase: AdaptadorDocs
  */
 
-public class ListAdapter extends BaseAdapter {
-    
-    Activity context;
-    Carpetas[] carpetas;
-    int status;
+public class AulaVirtualAdapter extends MainAdapter {
 
-    public ListAdapter(Activity context, Object[] contenido) {
-    	 super();
-         this.context = context;
-         if(contenido != null) {
-             this.carpetas = (Carpetas[]) contenido; 
-         }
-         this.status = MyModel.LOAD;
+    public AulaVirtualAdapter(Activity context) {
+    	 super(context, MyModel.LOAD, MyModel.AULAVIRTUAL);
     }
-    
-    /**
-     * @return the status
-     */
-    public int getStatus() {
-        return status;
-    }
-
-    /**
-     * @param status the status to set
-     */
-    public void setStatus(int status) {
-        this.status = status;
-    }
-
-    public void setCarpetas(Carpetas[] carpetas) {
-        this.carpetas = carpetas;
-    }
-    
-     
-    public int getCount() {
-        if(carpetas != null) {
-            return carpetas.length;
-        }
-        return 1;
-    }
-    
-    public Object getItem(int position) {
-        return position;
-    }
-    
-    public long getItemId(int position) {
-        return position;
-    }
-    
-    public void clearData() {
-        // clear the data
-        if(carpetas != null)
-            carpetas = null;
-    }
-    
-	private void setRestrictedOrientation() {
-		/* We don't want change screen orientation */
-	    //---get the current display info---
-	    WindowManager wm = context.getWindowManager();
-	    Display d = wm.getDefaultDisplay();
-	    if (d.getWidth() > d.getHeight()) {
-	    	//---change to landscape mode---
-	    	context.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
-	    } else {
-	    	//---change to portrait mode---
-	    	context.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
-	    }
-	}
     
 	public View getView(int position, View convertView, ViewGroup parent) {
     	View item = null;
     	LayoutInflater inflater = context.getLayoutInflater();
+        Carpetas[] carpetas = (Carpetas[])MyModel.getDataOn(MyModel.AULAVIRTUAL);
     	switch(status) {
     	    case MyModel.OK:
                 item = inflater.inflate(R.layout.list_docs, null);

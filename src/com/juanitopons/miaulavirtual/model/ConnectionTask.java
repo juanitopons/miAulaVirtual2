@@ -2,26 +2,30 @@ package com.juanitopons.miaulavirtual.model;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
+
+import org.jsoup.Connection.Response;
 import org.jsoup.Jsoup;
 
 import com.juanitopons.miaulavirtual.view.MainActivity;
 
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.BaseAdapter;
 
 public class ConnectionTask extends AsyncTask<String, Integer, Integer> {
     private MainActivity mainActivity; 
     private MyRequest request;
     private Parser parser;
-    private ListAdapter[] adapters;
+    private MainAdapter adapter;
     private int mode;
     private ConnectionTask taskToAwake = null;
+    private Response response = null;
     
     public ConnectionTask(MainActivity mainActivity, MyRequest request, Parser parser, int mode) {
         this.mainActivity = mainActivity;
         this.request = request;
         this.parser = parser;
-        this.adapters = MainActivity.getAdapters();
+        this.adapter = MainActivity.getAdapter(mode);
         this.mode = mode;
     }
     
@@ -29,7 +33,6 @@ public class ConnectionTask extends AsyncTask<String, Integer, Integer> {
         this.mainActivity = mainActivity;
         this.request = request;
         this.parser = parser;
-        this.adapters = MainActivity.getAdapters();
         this.mode = mode;
         this.taskToAwake = connectionTask2;
         
@@ -39,7 +42,7 @@ public class ConnectionTask extends AsyncTask<String, Integer, Integer> {
         Integer state = -1;
         try {
             if(!parameters[0].isEmpty()) {
-                request.doGet(parameters[0], mode);
+                response = request.doGet(parameters[0]);
             } else {
                 request.doPostUrl1();
                 request.doGetUrl2();
@@ -64,29 +67,38 @@ public class ConnectionTask extends AsyncTask<String, Integer, Integer> {
     protected void onCancelled(Integer state) {
         Log.d("model", "onCancelled: "+String.valueOf(mode));
         MainActivity.showError(state);
-        if(state == MyModel.BADDATA) {
-            mainActivity.moveToLogin();
+        if(mode != MyModel.POST) {
+            adapter.clearData();
+            adapter.setStatus(MyModel.ERROR);
+            adapter.notifyDataSetChanged();
         } else {
-            for(ListAdapter adapter : adapters) {
-                if(adapter!=null) { /** <<<<<<<<<<<<<<<<--------------BORRAR POST DESARROLLO------------>>>>>>>>>> **/
-                    adapter.clearData();
-                    adapter.setStatus(MyModel.ERROR);
-                    adapter.notifyDataSetChanged();
+            if(state == MyModel.BADDATA) {
+                mainActivity.moveToLogin();
+            } else {
+                for(MainAdapter adapter: MainActivity.getAdapters()) {
+                    if(adapter != null) {
+                        adapter.clearData();
+                        adapter.setStatus(MyModel.ERROR);
+                        adapter.notifyDataSetChanged();
+                    }
                 }
-            } 
+            }
         }
     }
 
     protected void onPostExecute(Integer state) {
         Log.d("model", "onPostExecute: "+String.valueOf(mode));
-        if(mode != MyModel.POST) {
-            adapters[mode].clearData();
-            parser.makeAulaVirtual(Jsoup.parse(request.getResp(MyModel.AULAVIRTUAL).body()));
-            adapters[mode].setCarpetas(parser.getAulaVirtual());
-            adapters[mode].setStatus(MyModel.OK);
-            adapters[mode].notifyDataSetChanged();
-        } else if(taskToAwake != null) {
-            taskToAwake.execute(String.valueOf(MyModel.getInstance().getPanel()), String.valueOf(taskToAwake.mode));
+        switch(mode) {
+            case MyModel.POST:
+                if(taskToAwake != null)
+                    taskToAwake.execute(String.valueOf(MyModel.getInstance().getPanel()));
+                break;
+            default:
+                adapter.clearData();
+                parser.makeAulaVirtual(Jsoup.parse(response.body()));
+                adapter.setStatus(MyModel.OK);
+                adapter.notifyDataSetChanged();
+                break;
         }
     }
 }

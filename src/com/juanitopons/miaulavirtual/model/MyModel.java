@@ -1,6 +1,8 @@
 package com.juanitopons.miaulavirtual.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import android.content.Context;
@@ -17,6 +19,7 @@ public class MyModel implements Serializable {
     public static final int POST = 2, AULAVIRTUAL = 0, CALENDARIO = 1;
     public static final int NOINTERNET = 0, RANDOM = 1, BADDATA = 2;
     public static final int ERROR = 0, LOAD = 1, OK = 2;
+    private static Object[][] data = new Object[2][];
     private MyRequest request;
     private Context context;
     private SharedPreferences prefs;
@@ -35,6 +38,34 @@ public class MyModel implements Serializable {
         return modelInstance;
      }
     
+    /**
+     * @return the data
+     */
+    public static Object[] getDataOn(int mode) {
+        return data[mode];
+    }
+
+    /**
+     * @param data the data to set
+     */
+    public static void setDataOn(Object[] data, int mode) {
+        MyModel.data[mode] = data;
+    }
+    
+    /**
+     * @return the data
+     */
+    public static Object[][] getData() {
+        return data;
+    }
+
+    /**
+     * @param data the data to set
+     */
+    public static void setData(Object[][] data) {
+        MyModel.data = data;
+    }
+
     public int getIntType(String type) {
         int a = CARPETA;
         if(mtypes[2].equals(type)) a = PDF; // 2 = PDF 

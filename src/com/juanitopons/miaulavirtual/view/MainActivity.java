@@ -5,7 +5,8 @@ import java.util.Locale;
 import com.juanitopons.miaulavirtual.R;
 import com.juanitopons.miaulavirtual.model.ConnectionDetector;
 import com.juanitopons.miaulavirtual.model.ConnectionTask;
-import com.juanitopons.miaulavirtual.model.ListAdapter;
+import com.juanitopons.miaulavirtual.model.AulaVirtualAdapter;
+import com.juanitopons.miaulavirtual.model.MainAdapter;
 import com.juanitopons.miaulavirtual.model.MyModel;
 import com.juanitopons.miaulavirtual.model.MyRequest;
 import com.juanitopons.miaulavirtual.model.Parser;
@@ -22,6 +23,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -31,7 +33,7 @@ public class MainActivity extends FragmentActivity {
     private static MyRequest request;
     private static Parser parser;
     private static ConnectionDetector connector;
-    private static ListAdapter[] adapters = new ListAdapter[2];
+    private static MainAdapter[] adapters = new MainAdapter[2];
     private static Context context;
     
     /**
@@ -58,7 +60,7 @@ public class MainActivity extends FragmentActivity {
         parser = Parser.getInstance();
         request = MyRequest.getInstance();
         context = this.getBaseContext();
-        adapters[MyModel.AULAVIRTUAL] = new ListAdapter(this, parser.getAulaVirtual());
+        adapters[MyModel.AULAVIRTUAL] = new AulaVirtualAdapter(this);
 
         ConnectionTask taskToWait = new ConnectionTask(this, request, parser, Integer.valueOf(MyModel.AULAVIRTUAL));
         new ConnectionTask(this, request, parser, MyModel.POST, taskToWait).execute(""); /** IMPORTANT **/
@@ -102,18 +104,24 @@ public class MainActivity extends FragmentActivity {
         model.setPass("0");
         startActivity(new Intent(MainActivity.this, LoginActivity.class));
     }
-
     /**
      * @return the adapters
      */
-    public static ListAdapter[] getAdapters() {
+    public static MainAdapter[] getAdapters() {
         return adapters;
     }
 
     /**
-     * @param adapters the adapters to set
+     * @return the adapter
      */
-    public static void setAdapters(ListAdapter[] adapters) {
+    public static MainAdapter getAdapter(int mode) {
+        return adapters[mode];
+    }
+
+    /**
+     * @param adapters the adapter to set
+     */
+    public static void setAdapters(MainAdapter[] adapters) {
         MainActivity.adapters = adapters;
     }
 
@@ -192,7 +200,6 @@ public class MainActivity extends FragmentActivity {
                     headerTitle.setText("Documentos");
                     
                     ListView lstDocs = (ListView) rootView[fragment-1].findViewById(R.id.LstDocs); // Declaramos la lista
-                    adapters[MyModel.AULAVIRTUAL] = new ListAdapter(this.getActivity(), parser.getAulaVirtual());
                     lstDocs.setAdapter(adapters[MyModel.AULAVIRTUAL]); // Declaramos nuestra propia clase adaptador como adaptador
                     
                     /** FIN **/

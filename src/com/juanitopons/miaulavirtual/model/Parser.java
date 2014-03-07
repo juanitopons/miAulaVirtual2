@@ -1,6 +1,8 @@
 package com.juanitopons.miaulavirtual.model;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -11,7 +13,6 @@ import android.util.Log;
 public class Parser {
     private static Parser parserInstance = null;
     private static MyModel modelInstance;
-    Carpetas[] aulaVirtual;
     
     protected Parser() {
         modelInstance = MyModel.getInstance();
@@ -23,57 +24,45 @@ public class Parser {
         }
         return parserInstance;
      }
-    
-    /**
-     * @return the aulaVirtual
-     */
-    public Carpetas[] getAulaVirtual() {
-        return aulaVirtual;
-    }
-
-    /**
-     * @param aulaVirtual the aulaVirtual to set
-     */
-    public void setAulaVirtual(Carpetas[] aulaVirtual) {
-        this.aulaVirtual = aulaVirtual;
-    }
 
     public Elements parseDocuments(Document mdoc) throws IOException {
         Elements elem = mdoc.select("table[summary] tbody tr[class=odd], table[summary] tbody tr[class=even], table[summary] tbody tr[class=even last], table[summary] tbody tr[class=odd last]"); //Filas de Documentos
         return elem;
     }
     
-    public void carpetasToArray(Elements elem /*, Boolean isHome, Boolean comun*/) throws IndexOutOfBoundsException {
+    public void carpetasToArray(Elements elem, Carpetas[] carpetas) throws IndexOutOfBoundsException {
+        
         int i = 0;
         elem = elem.select("td[headers=contents_name] a, td[headers=folders_name] a").not("[href*=/clubs/]");
         Log.d("model", String.valueOf(elem.size()));
         for(Element el : elem){
-            aulaVirtual[i].setNombre(el.text());
+            carpetas[i].setNombre(el.text());
             i++;
         }
     }
     
-    public void enlacesToArray(Elements elem /*, Boolean isHome, Boolean comun*/) throws IndexOutOfBoundsException {
+    public void enlacesToArray(Elements elem, Carpetas[] carpetas) throws IndexOutOfBoundsException {
         int i = 0;
         elem = elem.select("td[headers=contents_name] a, td[headers=folders_name] a").not("[href*=/clubs/]"); //Nombre Asignaturas String !"Comunuidades"
         Log.d("model", String.valueOf(elem.size()));
         for(Element el : elem){
-            aulaVirtual[i].setUrl(el.select("a").attr("href"));
+            carpetas[i].setUrl(el.select("a").attr("href"));
             i++;
         }
     }
     
-    public void tiposToArray(Elements elem /*, Boolean isHome, Boolean comun*/, int size) throws IndexOutOfBoundsException {
+    public void tiposToArray(Elements elem, Carpetas[] carpetas) throws IndexOutOfBoundsException {
         int i = 0;
         elem = elem.select("td[headers=folders_type], td[headers=contents_type]");
         Log.d("model", String.valueOf(elem.size()));
-        while(i<size){
-            aulaVirtual[i].setType(modelInstance.getIntType(elem.get(i).text().trim()));
+        while(i<carpetas.length){
+            carpetas[i].setType(modelInstance.getIntType(elem.get(i).text().trim()));
             i++;
         }
     }
     
     public void makeAulaVirtual(Document mdoc) {
+        Carpetas[] carpetas = (Carpetas[])MyModel.getDataOn(MyModel.AULAVIRTUAL);
         Elements elements = null;
         try {
             elements = parseDocuments(mdoc);
@@ -82,11 +71,12 @@ public class Parser {
             e.printStackTrace();
         }
         int count = elements.select("td[headers=contents_name] a, td[headers=folders_name] a").not("[href*=/clubs/]").size();
-        aulaVirtual = new Carpetas[count];
+        carpetas = new Carpetas[count];
         for(int i = 0; i<count; i++)
-            aulaVirtual[i] = new Carpetas();
-        carpetasToArray(elements);
-        enlacesToArray(elements);
-        tiposToArray(elements, aulaVirtual.length);
+            carpetas[i] = new Carpetas();
+        carpetasToArray(elements, carpetas);
+        enlacesToArray(elements, carpetas);
+        tiposToArray(elements, carpetas);
+        MyModel.setDataOn(carpetas, MyModel.AULAVIRTUAL);
     }
 }
