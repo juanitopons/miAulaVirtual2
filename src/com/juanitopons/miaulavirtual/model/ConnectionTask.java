@@ -13,26 +13,33 @@ import android.util.Log;
 import android.widget.BaseAdapter;
 
 public class ConnectionTask extends AsyncTask<String, Integer, Integer> {
+    private MyModel modelInstance;
     private MainActivity mainActivity; 
-    private MyRequest request;
-    private Parser parser;
     private MainAdapter adapter;
     private int mode;
     private ConnectionTask taskToAwake = null;
     private Response response = null;
+    private String parameters;
+    private boolean goBack = false;
     
-    public ConnectionTask(MainActivity mainActivity, MyRequest request, Parser parser, int mode) {
+    public ConnectionTask(MainActivity mainActivity, int mode) {
+        this.modelInstance = MyModel.getInstance();
         this.mainActivity = mainActivity;
-        this.request = request;
-        this.parser = parser;
-        this.adapter = MainActivity.getAdapter(mode);
+        this.adapter = MyModel.getAdaptersOn(mode);
         this.mode = mode;
     }
     
-    public ConnectionTask(MainActivity mainActivity, MyRequest request, Parser parser, int mode, ConnectionTask connectionTask2) {
+    public ConnectionTask(MainActivity mainActivity, int mode, boolean goBack) {
+        this.modelInstance = MyModel.getInstance();
         this.mainActivity = mainActivity;
-        this.request = request;
-        this.parser = parser;
+        this.adapter = MyModel.getAdaptersOn(mode);
+        this.mode = mode;
+        this.goBack = goBack;
+    }
+    
+    public ConnectionTask(MainActivity mainActivity, int mode, ConnectionTask connectionTask2) {
+        this.modelInstance = MyModel.getInstance();
+        this.mainActivity = mainActivity;
         this.mode = mode;
         this.taskToAwake = connectionTask2;
         
@@ -42,10 +49,12 @@ public class ConnectionTask extends AsyncTask<String, Integer, Integer> {
         Integer state = -1;
         try {
             if(!parameters[0].isEmpty()) {
-                response = request.doGet(parameters[0]);
+                this.parameters = parameters[0];
+                Log.d("model", parameters[0]);
+                response = modelInstance.getRequest().doGet(parameters[0]);
             } else {
-                request.doPostUrl1();
-                request.doGetUrl2();
+                modelInstance.getRequest().doPostUrl1();
+                modelInstance.getRequest().doGetUrl2();
             }
             Log.d("model", "doInBackground acabado: "+String.valueOf(mode));
         } catch (SocketTimeoutException e) {
@@ -75,7 +84,7 @@ public class ConnectionTask extends AsyncTask<String, Integer, Integer> {
             if(state == MyModel.BADDATA) {
                 mainActivity.moveToLogin();
             } else {
-                for(MainAdapter adapter: MainActivity.getAdapters()) {
+                for(MainAdapter adapter: MyModel.getAdapters()) {
                     if(adapter != null) {
                         adapter.clearData();
                         adapter.setStatus(MyModel.ERROR);
@@ -91,13 +100,19 @@ public class ConnectionTask extends AsyncTask<String, Integer, Integer> {
         switch(mode) {
             case MyModel.POST:
                 if(taskToAwake != null)
-                    taskToAwake.execute(String.valueOf(MyModel.getInstance().getPanel()));
+                    taskToAwake.execute(modelInstance.getUrl3()+MyModel.URL4+modelInstance.getPanel());
                 break;
             default:
                 adapter.clearData();
-                parser.makeAulaVirtual(Jsoup.parse(response.body()));
+                modelInstance.getParser().makeAulaVirtual(Jsoup.parse(response.body()));
                 adapter.setStatus(MyModel.OK);
                 adapter.notifyDataSetChanged();
+                if(mode == MyModel.AULAVIRTUAL)
+                    if(!goBack)
+                        Carpetas.addToVector(parameters);
+                    else
+                        Carpetas.delLastInVector();
+                mainActivity.setBackActive(true);
                 break;
         }
     }

@@ -27,7 +27,6 @@ public abstract class MainAdapter extends BaseAdapter {
         this.status = status;
         this.mode = mode;
     }
-    
 
     /**
      * @param status the status to set

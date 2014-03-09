@@ -12,21 +12,13 @@ import org.jsoup.Connection.Response;
 import org.jsoup.Jsoup;
 
 public class MyRequest {
-    private static MyRequest requestInstance = null;
     private MyModel modelInstance;
     private ConnectionDetector connectionInstance;
     
-    protected MyRequest() {
-        modelInstance = MyModel.getInstance();
-        connectionInstance = ConnectionDetector.getInstance(modelInstance.getContext());
+    public MyRequest(MyModel model) {
+        modelInstance = model;
+        connectionInstance = model.getConnector();
     }
-    
-    public static MyRequest getInstance() {
-        if(requestInstance == null) {
-            requestInstance = new MyRequest();
-        }
-        return requestInstance;
-     }
     
     public Response doPostUrl1() throws IOException, SocketTimeoutException, BadDataException {
         Log.d("model", "POST");
@@ -59,7 +51,7 @@ public class MyRequest {
     
     public Response doGet(String parameters) throws IOException, SocketTimeoutException {
         checkInternet();
-        Response resp = Jsoup.connect(modelInstance.getUrl3()+parameters).cookies(modelInstance.getCookies1()).method(Method.GET).timeout(10*1000).execute();
+        Response resp = Jsoup.connect(parameters).cookies(modelInstance.getCookies1()).method(Method.GET).timeout(10*1000).execute();
         
         return resp;
     }

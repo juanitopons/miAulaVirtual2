@@ -3,6 +3,7 @@ package com.juanitopons.miaulavirtual.view;
 import java.util.Locale;
 
 import com.juanitopons.miaulavirtual.R;
+import com.juanitopons.miaulavirtual.controller.MyController;
 import com.juanitopons.miaulavirtual.model.ConnectionDetector;
 import com.juanitopons.miaulavirtual.model.ConnectionTask;
 import com.juanitopons.miaulavirtual.model.AulaVirtualAdapter;
@@ -23,6 +24,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -30,11 +32,9 @@ import android.widget.Toast;
 
 public class MainActivity extends FragmentActivity {
     private static MyModel model;
-    private static MyRequest request;
-    private static Parser parser;
-    private static ConnectionDetector connector;
-    private static MainAdapter[] adapters = new MainAdapter[2];
     private static Context context;
+    private static MyController controller;
+    private boolean backActive = true;
     
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -44,7 +44,7 @@ public class MainActivity extends FragmentActivity {
      * intensive, it may be best to switch to a
      * {@link android.support.v4.app.FragmentStatePagerAdapter}.
      */
-    SectionsPagerAdapter mSectionsPagerAdapter;
+    private static SectionsPagerAdapter mSectionsPagerAdapter;
 
     /**
      * The {@link ViewPager} that will host the section contents.
@@ -56,14 +56,12 @@ public class MainActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main); /** IMPORTANT **/
         model = MyModel.getInstance();
-        connector = ConnectionDetector.getInstance(model.getContext());
-        parser = Parser.getInstance();
-        request = MyRequest.getInstance();
+        controller = MyController.getInstance(model, this);
         context = this.getBaseContext();
-        adapters[MyModel.AULAVIRTUAL] = new AulaVirtualAdapter(this);
-
-        ConnectionTask taskToWait = new ConnectionTask(this, request, parser, Integer.valueOf(MyModel.AULAVIRTUAL));
-        new ConnectionTask(this, request, parser, MyModel.POST, taskToWait).execute(""); /** IMPORTANT **/
+       
+        MyModel.setAdaptersOn(new AulaVirtualAdapter(this), MyModel.AULAVIRTUAL);
+        ConnectionTask taskToWait = new ConnectionTask(this, Integer.valueOf(MyModel.AULAVIRTUAL));
+        new ConnectionTask(this, MyModel.POST, taskToWait).execute(""); /** IMPORTANT **/
 
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the app.
@@ -71,6 +69,7 @@ public class MainActivity extends FragmentActivity {
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.pager);
+        mViewPager.setOnPageChangeListener(controller.getFragmentController());
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
     }
@@ -81,7 +80,7 @@ public class MainActivity extends FragmentActivity {
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
-    
+
     public static void showError(int error) {
         switch(error) {
             case 0:
@@ -104,27 +103,20 @@ public class MainActivity extends FragmentActivity {
         model.setPass("0");
         startActivity(new Intent(MainActivity.this, LoginActivity.class));
     }
-    /**
-     * @return the adapters
-     */
-    public static MainAdapter[] getAdapters() {
-        return adapters;
-    }
 
     /**
-     * @return the adapter
+     * @param backActive the backActive to set
      */
-    public static MainAdapter getAdapter(int mode) {
-        return adapters[mode];
+    public void setBackActive(boolean backActive) {
+        this.backActive = backActive;
     }
 
-    /**
-     * @param adapters the adapter to set
-     */
-    public static void setAdapters(MainAdapter[] adapters) {
-        MainActivity.adapters = adapters;
+    @Override
+    public void onBackPressed() {
+        if(backActive)
+            controller.doBackController();
     }
-
+    
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
@@ -189,6 +181,7 @@ public class MainActivity extends FragmentActivity {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             int fragment = getArguments().getInt(ARG_SECTION_NUMBER);
+            controller.setBackControllerActivity(getActivity());
             switch(fragment) {
                 case 1: /** Aula Virtual **/
                     rootView[fragment-1] = inflater.inflate(R.layout.activity_display_message, container, false);
@@ -199,28 +192,23 @@ public class MainActivity extends FragmentActivity {
                     headerTitle.setTypeface(null, 1);
                     headerTitle.setText("Documentos");
                     
-                    ListView lstDocs = (ListView) rootView[fragment-1].findViewById(R.id.LstDocs); // Declaramos la lista
-                    lstDocs.setAdapter(adapters[MyModel.AULAVIRTUAL]); // Declaramos nuestra propia clase adaptador como adaptador
+                    ListView list = (ListView) rootView[fragment-1].findViewById(R.id.LstDocs); // Declaramos la lista
+                    list.setAdapter(MyModel.getAdaptersOn(MyModel.AULAVIRTUAL)); // Declaramos nuestra propia clase adaptador como adaptador
+                    list.setOnItemClickListener(controller.getAulaController());
                     
                     /** FIN **/
+                    break;
+                case 2:
+                    rootView[fragment-1] = inflater.inflate(R.layout.fragment_main_dummy, container, false);
+                    TextView dummyTextView = (TextView) rootView[fragment-1].findViewById(R.id.section_label);
+                    dummyTextView.setText(Integer.toString(fragment));
                     break;
                 case 3: /** Tareas **/
                     rootView[fragment-1] = inflater.inflate(R.layout.load, container, false);
                     break;
                 default:
-                    rootView[fragment-1] = inflater.inflate(R.layout.fragment_main_dummy, container, false);
-                    TextView dummyTextView = (TextView) rootView[fragment-1].findViewById(R.id.section_label);
-                    dummyTextView.setText(Integer.toString(fragment));
                     break;     
             }
-            
-            /*TextView dummyTextView = (TextView) rootView
-                    .findViewById(R.id.section_label);
-            dummyTextView.setText(Integer.toString(getArguments().getInt(
-                    ARG_SECTION_NUMBER)));
-                    */
-            
-            
             return getViewByFragment(fragment);
         }
     }

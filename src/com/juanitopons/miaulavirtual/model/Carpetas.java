@@ -2,8 +2,10 @@ package com.juanitopons.miaulavirtual.model;
 
 import java.util.Vector;
 
+import android.util.Log;
+
 public class Carpetas {
-    private static Vector<String> lead; /** IMPORTANT **/
+    private static Vector<String> lead = new Vector<String>(); /** IMPORTANT **/
     private String nombre;
     private String url;
     private int type;
@@ -22,13 +24,23 @@ public class Carpetas {
         this.type = type;
     }
     
-    public void delLastInVector() {
-        lead.remove(lead.size());
+    public static void delLastInVector() {
+        lead.remove(lead.size()-1);
     }
     
-    public void addToVector(String url) {
-        lead.add(url);
+    public static String getInVector(int index) {
+        return lead.get(index);
     }
+    
+    public static void addToVector(String url) {
+        lead.add(url);
+        Log.d("model", lead.toString());
+    }
+    
+    public static int vectorSize() {
+        return lead.size();
+    }
+    
     /**
      * @return the nombre
      */

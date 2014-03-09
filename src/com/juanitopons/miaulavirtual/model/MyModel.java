@@ -13,13 +13,17 @@ import android.content.SharedPreferences.Editor;
 public class MyModel implements Serializable {
     private static MyModel modelInstance;
     private static String[] mtypes = {"carpeta", "Carpeta", "PDF", "Microsoft Excel", "Microsoft PowerPoint", "Microsoft Word"};
-    private final String url1 = "https://as.uv.es/cgi-bin/AuthServer", url2 = "http://aulavirtual.uv.es/cas", url3 = "http://aulavirtual.uv.es/dotlrn/?page_num=";
+    public static final String url1 = "https://as.uv.es/cgi-bin/AuthServer", url2 = "http://aulavirtual.uv.es/cas", url3 = "http://aulavirtual.uv.es", URL4 = "/dotlrn/?page_num=";
     //Map<String, Integer> aMap = new HashMap<String, Integer>({{"carpeta", 0}});
     public static final int CARPETA = 0, PDF = 1, EXCEL = 2, PPT = 3, WORD = 4; 
     public static final int POST = 2, AULAVIRTUAL = 0, CALENDARIO = 1;
     public static final int NOINTERNET = 0, RANDOM = 1, BADDATA = 2;
     public static final int ERROR = 0, LOAD = 1, OK = 2;
+
+    private static MainAdapter[] adapters = new MainAdapter[2];
     private static Object[][] data = new Object[2][];
+    private ConnectionDetector connector;
+    private Parser parser;
     private MyRequest request;
     private Context context;
     private SharedPreferences prefs;
@@ -27,17 +31,94 @@ public class MyModel implements Serializable {
     private String user, pass, panel;
     private Map<String, String> cookies1;
     
-    protected MyModel() {
+    protected MyModel(Context context) {
         modelInstance = this;
+        this.context = context;
+        this.connector = new ConnectionDetector(this);
+        this.parser = new Parser(this);
+        this.request = new MyRequest(this);
+        
+        prefs = context.getSharedPreferences("apppreferences", 0);
+        user = prefs.getString("myuser", "0");
+        pass = prefs.getString("mypass", "0");
+        panel = prefs.getString("panel", "2");
+        editor = prefs.edit();
     }
     
     public static MyModel getInstance() {
+        return modelInstance;
+    }
+    
+    public static MyModel getInstance(Context context) {
         if(modelInstance == null) {
-            modelInstance = new MyModel();
+            modelInstance = new MyModel(context);
         }
         return modelInstance;
-     }
+    }
     
+    /**
+     * @return the connector
+     */
+    public ConnectionDetector getConnector() {
+        return connector;
+    }
+
+    /**
+     * @return the parser
+     */
+    public Parser getParser() {
+        return parser;
+    }
+
+    /**
+     * @param connector the connector to set
+     */
+    public void setConnector(ConnectionDetector connector) {
+        this.connector = connector;
+    }
+
+    /**
+     * @param parser the parser to set
+     */
+    public void setParser(Parser parser) {
+        this.parser = parser;
+    }
+
+    /**
+     * @param request the request to set
+     */
+    public void setRequest(MyRequest request) {
+        this.request = request;
+    }
+
+    /**
+     * @return the adapters
+     */
+    public static MainAdapter getAdaptersOn(int mode) {
+        return adapters[mode];
+    }
+
+    /**
+     * @param adapters the adapters to set
+     */
+    public static void setAdaptersOn(MainAdapter adapters, int mode) {
+        MyModel.adapters[mode] = adapters;
+    }
+    
+    /**
+     * @return the adapters
+     */
+    public static MainAdapter[] getAdapters() {
+        return adapters;
+    }
+
+    /**
+     * @param adapters the adapters to set
+     */
+    public static void setAdapters(MainAdapter[] adapters) {
+        MyModel.adapters = adapters;
+    }
+
     /**
      * @return the data
      */
@@ -116,15 +197,6 @@ public class MyModel implements Serializable {
      */
     public String getPanel() {
         return panel;
-    }
-    
-    public void setContext(Context context) {
-        this.context = context;
-        prefs = context.getSharedPreferences("apppreferences", 0);
-        user = prefs.getString("myuser", "0");
-        pass = prefs.getString("mypass", "0");
-        panel = prefs.getString("panel", "2");
-        editor = prefs.edit();
     }
 
     /**

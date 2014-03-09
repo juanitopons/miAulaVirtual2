@@ -1,15 +1,10 @@
 package com.juanitopons.miaulavirtual.view;
 
 
-import java.io.IOException;
-import java.net.SocketTimeoutException;
-
 import com.juanitopons.miaulavirtual.R;
-import com.juanitopons.miaulavirtual.model.BadDataException;
+import com.juanitopons.miaulavirtual.controller.MyController;
 import com.juanitopons.miaulavirtual.model.BaseActivity;
-import com.juanitopons.miaulavirtual.model.ConnectionDetector;
 import com.juanitopons.miaulavirtual.model.MyModel;
-import com.juanitopons.miaulavirtual.model.MyRequest;
 
 
 import android.content.Intent;
@@ -32,8 +27,7 @@ public class LoginActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         
         PreferenceManager.setDefaultValues(this.getApplicationContext(), R.xml.apppreferences, false);
-        model = MyModel.getInstance();
-        model.setContext(this.getApplicationContext());
+        model = MyModel.getInstance(this.getApplicationContext());
         Log.d("model", model.toString());
         
         if(model.getUser().equals("0")){

@@ -11,19 +11,11 @@ import org.jsoup.select.Elements;
 import android.util.Log;
 
 public class Parser {
-    private static Parser parserInstance = null;
     private static MyModel modelInstance;
     
-    protected Parser() {
-        modelInstance = MyModel.getInstance();
+    public Parser(MyModel model) {
+        modelInstance = model;
     }
-    
-    public static Parser getInstance() {
-        if(parserInstance == null) {
-            parserInstance = new Parser();
-        }
-        return parserInstance;
-     }
 
     public Elements parseDocuments(Document mdoc) throws IOException {
         Elements elem = mdoc.select("table[summary] tbody tr[class=odd], table[summary] tbody tr[class=even], table[summary] tbody tr[class=even last], table[summary] tbody tr[class=odd last]"); //Filas de Documentos
